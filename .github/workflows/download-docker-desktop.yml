@@ -29,7 +29,7 @@ jobs:
           import requests
           import os
           
-          url = "https://desktop.docker.com/win/main/arm64/Docker%20Desktop%20Installer.exe" # 这里是Docker Desktop Windows版的URL
+          url = "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe" # 这里是Docker Desktop Windows版的URL
           file_name = "Docker_Desktop_Installer.exe"
           response = requests.get(url, stream=True)
           if response.status_code == 200:
@@ -46,7 +46,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           tag_name: v1.0.${{ github.run_number }} # 使用工作流的运行次数作为版本号的一部分
           release_name: Docker Desktop Installer v1.0.${{ github.run_number }}
@@ -57,7 +57,7 @@ jobs:
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object (which include a `upload_url`)
           asset_path: Docker_Desktop_Installer.exe
