@@ -29,7 +29,7 @@ jobs:
           import requests
           import os
           
-          url = "https://desktop.docker.com/win/main/arm64/Docker%20Desktop%20Installer.exe?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-win-arm64&_gl=1*76ugs1*_ga*MTQ1Mzc2ODc1OC4xNzMyMTA4MzI3*_ga_XJWPQMJYHQ*MTczMjEwODMyNi4xLjEuMTczMjEwODM0Mi40NC4wLjA." # 这里是Docker Desktop Windows版的URL
+          url = "https://desktop.docker.com/win/main/arm64/Docker%20Desktop%20Installer.exe" # 这里是Docker Desktop Windows版的URL
           file_name = "Docker_Desktop_Installer.exe"
           response = requests.get(url, stream=True)
           if response.status_code == 200:
