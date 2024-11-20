@@ -1,65 +1,38 @@
-name: Download Docker Desktop and Publish to Release
+name: Docker Installer Download
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 3 * * 1' # 每周一的凌晨3点执行
-  workflow_dispatch: # 允许手动触发
+    - cron: '00 23 * * *'
+
+permissions:
+  contents: write
 
 jobs:
-  download-and-publish:
+  download_installer:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+    - name: Download installers
+      run: |
+         curl -o linux.sh "https://get.docker.com"
+         curl -o docker_desktop_installer_windows_x86_64.exe "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe"
+         curl -o docker_desktop_installer_mac_arm64.dmg "https://desktop.docker.com/mac/main/arm64/Docker.dmg"
+         curl -o docker_desktop_installer_mac_x84_64.dmg "https://desktop.docker.com/mac/main/amd64/Docker.dmg"
+         curl -o docker_desktop_installer_linux_debian_x84_64.dmg "https://desktop.docker.com/linux/main/amd64/149282/docker-desktop-4.30.0-amd64.deb"
+         curl -o docker_desktop_installer_linux_fedora_x84_64.dmg "https://desktop.docker.com/linux/main/amd64/149282/docker-desktop-4.30.0-x86_64.rpm"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: Download Docker Desktop
-        id: download
-        run: |
-          import requests
-          import os
-          
-          url = "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe" # 这里是Docker Desktop Windows版的URL
-          file_name = "Docker_Desktop_Installer.exe"
-          response = requests.get(url, stream=True)
-          if response.status_code == 200:
-              with open(file_name, 'wb') as f:
-                  for chunk in response.iter_content(chunk_size=8192):
-                      f.write(chunk)
-              print(f"{file_name} has been downloaded successfully.")
-          else:
-              print("Failed to download the file.")
-              exit(1)
-        shell: python {0}
-
-      - name: Create or Update Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        with:
-          tag_name: v1.0.${{ github.run_number }} # 使用工作流的运行次数作为版本号的一部分
-          release_name: Docker Desktop Installer v1.0.${{ github.run_number }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object (which include a `upload_url`)
-          asset_path: Docker_Desktop_Installer.exe
-          asset_name: Docker_Desktop_Installer.exe
-          asset_content_type: application/octet-stream
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          linux.sh
+          docker_desktop_installer_windows_x86_64.exe
+          docker_desktop_installer_mac_arm64.dmg
+          docker_desktop_installer_mac_x84_64.dmg
+          docker_desktop_installer_linux_debian_x84_64.dmg
+          docker_desktop_installer_linux_fedora_x84_64.dmg
+        tag_name: latest
